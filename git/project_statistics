@@ -43,4 +43,23 @@ for dir in $directories; do
 
       # Update total counters
       total_changed_files=$((total_changed_files + changed_files))
-      total_commits=$((total_commits + commits
+      total_commits=$((total_commits + commits))
+
+      # Store project name and commits in the array
+      projects+=("$dir $commits")
+    fi
+  fi
+done
+
+# Print total stats
+echo "Total changed files in all directories: $total_changed_files"
+echo "Total commits in all directories: $total_commits"
+echo
+
+# Display all projects ordered by commits
+echo "All Projects Ordered by Commits:"
+for project in $(printf "%s\n" "${projects[@]}" | sort -k2 -nr); do
+  project_name=$(echo "$project" | cut -d' ' -f1)
+  project_commits=$(echo "$project" | cut -d' ' -f2)
+  echo "$project_name: $project_commits commits"
+done
