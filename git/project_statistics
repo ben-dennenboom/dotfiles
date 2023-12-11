@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# Function to calculate the number of changed files and commits for a given directory
+get_git_stats() {
+  local dir=$1
+  local changed_files=$(git -C "$dir" log --since="1 year ago" --pretty=format: --numstat | wc -l)
+  local commits=$(git -C "$dir" rev-list --count --since="1 year ago" HEAD)
+  echo "$changed_files $commits"
+}
+
+# Get a list of all directories in the current directory
+directories=$(find . -maxdepth 1 -type d)
+
+total_changed_files=0
+total_commits=0
+
+projects=()
+
+# Loop through each directory
+for dir in $directories; do
+  # Exclude the current directory (.) and parent directory (..)
+  if [[ "$dir" != "." && "$dir" != ".." ]]; then
+    # Check if the directory is a Git repository
+    if [ -d "$dir/.git" ]; then
+      # Get git stats for the directory
+      stats=($(get_git_stats "$dir"))
+      changed_files=${stats[0]}
+      commits=${stats[1]}
+
+      # Print stats for the directory
+      echo "Directory: $dir"
+      echo "Changed files in the last year: $changed_files"
+      echo "Commits in the last year: $commits"
+      echo
+
+      # Update total counters
+      total_changed_files=$((total_changed_files + changed_files))
+      total_commits=$((total_commits + commits))
+
+      # Store project name and commits in the array
+      projects+=("$dir $commits")
+    fi
+  fi
+done
+
+# Print total stats
+echo "Total changed files in all directories: $total_changed_files"
+echo "Total commits in all directories: $total_commits"
+echo
+
+# Display top 5 projects by commits
+echo "Top 5 Projects by Commits:"
+for project in $(echo "${projects[@]}" | sort -k2 -nr | head -n 5); do
+  project_name=$(echo "$project" | cut -d' ' -f1)
+  project_commits=$(echo "$project" | cut -d' ' -f2)
+  echo "$project_name: $project_commits commits"
+done
