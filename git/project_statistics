@@ -1,10 +1,13 @@
 #!/bin/bash
 
+# Replace 'YourName' with your actual git username
+your_username="ben-dennenboom"
+
 # Function to calculate the number of changed files and commits for a given directory
 get_git_stats() {
   local dir=$1
-  local changed_files=$(git -C "$dir" log --since="1 year ago" --pretty=format: --numstat | wc -l)
-  local commits=$(git -C "$dir" rev-list --count --since="1 year ago" HEAD)
+  local changed_files=$(git -C "$dir" log --since="1 year ago" --pretty=format: --numstat --author="$your_username" | wc -l)
+  local commits=$(git -C "$dir" rev-list --count --since="1 year ago" --author="$your_username" HEAD)
   echo "$changed_files $commits"
 }
 
@@ -27,6 +30,11 @@ for dir in $directories; do
       changed_files=${stats[0]}
       commits=${stats[1]}
 
+      # Skip projects with 0 commits
+      if [ "$commits" -eq 0 ]; then
+        continue
+      fi
+
       # Print stats for the directory
       echo "Directory: $dir"
       echo "Changed files in the last year: $changed_files"
@@ -35,23 +43,4 @@ for dir in $directories; do
 
       # Update total counters
       total_changed_files=$((total_changed_files + changed_files))
-      total_commits=$((total_commits + commits))
-
-      # Store project name and commits in the array
-      projects+=("$dir $commits")
-    fi
-  fi
-done
-
-# Print total stats
-echo "Total changed files in all directories: $total_changed_files"
-echo "Total commits in all directories: $total_commits"
-echo
-
-# Display top 5 projects by commits
-echo "Top 5 Projects by Commits:"
-for project in $(echo "${projects[@]}" | sort -k2 -nr | head -n 5); do
-  project_name=$(echo "$project" | cut -d' ' -f1)
-  project_commits=$(echo "$project" | cut -d' ' -f2)
-  echo "$project_name: $project_commits commits"
-done
+      total_commits=$((total_commits + commits
