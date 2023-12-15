@@ -7,12 +7,12 @@ your_username="ben-dennenboom"
 get_git_stats() {
   local dir=$1
   local changed_files=$(git -C "$dir" log --since="1 year ago" --pretty=format: --numstat --author="$your_username" | wc -l)
-  local commits=$(git -C "$dir" rev-list --count --since="1 year ago" --author="$your_username" HEAD)
+  local commits=$(git -C "$dir" shortlog --summary --numbered --all --no-merges --since="1 year ago" --author="$your_username" HEAD)
   echo "$changed_files $commits"
 }
 
 # Get a list of all directories in the current directory
-directories=$(find . -maxdepth 1 -type d)
+directories=$(find . -maxdepth 2 -type d)
 
 total_changed_files=0
 total_commits=0
@@ -30,6 +30,7 @@ for dir in $directories; do
       changed_files=${stats[0]}
       commits=${stats[1]}
 
+      
       # Skip projects with 0 commits
       if [ "$commits" -eq 0 ]; then
         continue
@@ -54,12 +55,3 @@ done
 # Print total stats
 echo "Total changed files in all directories: $total_changed_files"
 echo "Total commits in all directories: $total_commits"
-echo
-
-# Display all projects ordered by commits
-echo "All Projects Ordered by Commits:"
-for project in $(printf "%s\n" "${projects[@]}" | sort -k2 -nr); do
-  project_name=$(echo "$project" | cut -d' ' -f1)
-  project_commits=$(echo "$project" | cut -d' ' -f2)
-  echo "$project_name: $project_commits commits"
-done
