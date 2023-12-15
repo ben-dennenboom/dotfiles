@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Replace 'YourName' with your actual git username
+# Replace with your actual git username
 your_username="ben-dennenboom"
 
 # Function to calculate the number of changed files and commits for a given directory
