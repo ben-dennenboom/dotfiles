@@ -1,2 +1,2 @@
 # maesbn dotfiles
-A list of dotfiles and bashscripts I use for my convenience.
+A list of dotfiles and bash scripts I use for my convenience.
