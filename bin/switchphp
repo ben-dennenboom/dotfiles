@@ -1,0 +1,33 @@
+#!/bin/bash
+
+available=$(brew list --formula -1 | egrep '^php@|^php$')
+
+syntax () {
+	echo "SYNTAX: $0 <version>"
+	echo ""
+	echo -n "<version> needs to be one of: "
+	echo $available
+	echo ""
+	echo "Choose the latest version of PHP by naming 'php' as the version"
+	exit 2
+}
+
+# check if enough arguments
+if [ "$#" -ne 1 ]; then
+	syntax
+fi
+
+version=$(echo "${available}" | grep "${1}" | head -n 1)
+
+# check if valid version
+if [[ -z "$version" ]]; then
+	syntax
+fi
+
+# do it
+echo "Will use version $version"
+echo $available | xargs brew unlink
+
+# first default to a known 'safe' version,
+# otherwise we cannot always do the change
+brew link $version
